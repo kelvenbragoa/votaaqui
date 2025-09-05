@@ -139,10 +139,11 @@
           <div class="col-lg-2 col-md-3 footer-links">
             <h4>Reality Show</h4>
             <ul>
-              <li><a href="#" @click.prevent>Episódios</a></li>
-              <li><a href="#" @click.prevent>Eliminações</a></li>
-              <li><a href="#" @click.prevent>Próximos eventos</a></li>
-              <li><a href="#" @click.prevent>Resultados</a></li>
+              <li><router-link to="/episodios" @click.prevent>Episódios</router-link></li>
+            <li><router-link to="/eliminacoes" @click.prevent>Eliminações</router-link></li>
+
+              <li><router-link to="/proximos-eventos" @click.prevent>Próximos eventos</router-link></li>
+              <li><router-link to="/resultados" @click.prevent>Resultados</router-link></li>
             </ul>
           </div>
 

@@ -1,0 +1,1 @@
+import{c as e,d as t,l as a}from"./app-nGuvejiM.js";import{S as s}from"./StatsWidget-DhJzyVmJ.js";const o={class:"grid grid-cols-12 gap-8"},n={__name:"Dashboard",setup(r){return(c,_)=>(a(),e("div",o,[t(s)]))}};export{n as default};

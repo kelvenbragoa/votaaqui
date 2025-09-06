@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('participations', function (Blueprint $table) {
             // Rename contestant_id to participant_id
-            $table->renameColumn('contestant_id', 'participant_id');
+            // $table->renameColumn('contestant_id', 'participant_id');
             
             // Add missing columns
             $table->enum('status', ['active', 'eliminated', 'saved'])->default('active')->after('episode_id');

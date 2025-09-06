@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Traits\Blameable;
 
 class Episode extends Model
 {
-    use Blameable;
+    // use Blameable;
 
     protected $fillable = [
         'episode_number',
@@ -42,7 +43,7 @@ class Episode extends Model
     public function participants(): BelongsToMany
     {
         return $this->belongsToMany(Participant::class, 'participations')
-                    ->withPivot(['status', 'position', 'elimination_order'])
+                    ->withPivot(['status', 'position', 'elimination_order', 'eliminated_at'])
                     ->withTimestamps();
     }
 
@@ -53,12 +54,20 @@ class Episode extends Model
 
     public function judgeVotes(): HasMany
     {
-        return $this->hasMany(JudgeVote::class);
+        return $this->hasMany(JudgeVote::class, 'episode_id');
     }
 
-    public function publicVotes(): HasMany
+    public function publicVotes(): HasManyThrough
     {
-        return $this->hasMany(PublicVote::class);
+        // Public votes are related through participations
+        return $this->hasManyThrough(
+            PublicVote::class,
+            Participation::class,
+            'episode_id',      // Foreign key on participations table
+            'participation_id', // Foreign key on public_votes table
+            'id',              // Local key on episodes table
+            'id'               // Local key on participations table
+        );
     }
 
     // Scopes
@@ -97,37 +106,69 @@ class Episode extends Model
         return true;
     }
 
+    /**
+     * Get the current active episode for voting
+     * Reality show rule: Only one episode should be active at a time
+     */
+    public static function getCurrentActiveEpisode(): ?Episode
+    {
+        return static::where('voting_open', true)
+            ->where('status', 'live')
+            ->orderBy('episode_number', 'desc')
+            ->first();
+    }
+
+    /**
+     * Close all other episodes' voting when opening a new one
+     */
+    public function openVotingExclusively(): bool
+    {
+        // Close all other episodes
+        static::where('id', '!=', $this->id)->update(['voting_open' => false]);
+        
+        // Open this episode and set to live
+        return $this->update([
+            'voting_open' => true,
+            'status' => 'live'
+        ]);
+    }
+
     public function getVotingResults(): array
     {
-        $publicVotes = $this->publicVotes()
-            ->selectRaw('participant_id, COUNT(*) as vote_count')
-            ->groupBy('participant_id')
-            ->get()
-            ->keyBy('participant_id');
-
-        $judgeVotes = $this->judgeVotes()
-            ->selectRaw('participant_id, AVG(score) as avg_score, COUNT(*) as judge_count')
-            ->groupBy('participant_id')
-            ->get()
-            ->keyBy('participant_id');
-
         $results = [];
         $participants = $this->participants;
 
         foreach ($participants as $participant) {
-            $publicCount = $publicVotes->get($participant->id)?->vote_count ?? 0;
-            $judgeAvg = $judgeVotes->get($participant->id)?->avg_score ?? 0;
+            // Get participation for this episode and participant
+            $participation = Participation::where('episode_id', $this->id)
+                ->where('participant_id', $participant->id)
+                ->first();
+
+            if (!$participation) {
+                continue;
+            }
+
+            // Count public votes for this participation
+            $publicCount = PublicVote::where('participation_id', $participation->id)->count();
+
+            // Get judge votes for this participation
+            $judgeVotes = JudgeVote::where('participation_id', $participation->id)->get();
+            $judgeCount = $judgeVotes->count();
+            $judgeAvg = $judgeCount > 0 ? $judgeVotes->avg('final_score') : 0;
             
-            $results[$participant->id] = [
-                'participant' => $participant,
+            $results[] = [
+                'participant_id' => $participant->id,
+                'participant_name' => $participant->name,
+                'participant_photo' => $participant->photo_url,
                 'public_votes' => $publicCount,
-                'judge_average' => $judgeAvg,
-                'total_score' => ($publicCount * $this->public_weight / 100) + 
-                               ($judgeAvg * $this->jury_weight / 100)
+                'judge_votes' => $judgeCount,
+                'judge_average' => (float) $judgeAvg,
+                'total_score' => ($publicCount * ($this->public_weight ?? 50) / 100) + 
+                               ($judgeAvg * ($this->jury_weight ?? 50) / 100)
             ];
         }
 
-        return collect($results)->sortByDesc('total_score')->toArray();
+        return collect($results)->sortByDesc('total_score')->values()->toArray();
     }
 
     public function eliminateParticipants(array $participantIds): bool

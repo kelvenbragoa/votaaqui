@@ -1,126 +1,5 @@
-<script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
-
-const route = useRoute()
-const router = useRouter()
-
-// Reactive data
-const participant = ref(null)
-const loading = ref(true)
-const error = ref(null)
-const submitting = ref(false)
-const submitError = ref(null)
-const submitSuccess = ref(false)
-
-// Page content (static)
-const backgroundImage = '/votaaqui/assets/img/events/showcase-9.webp'
-const defaultImage = '/votaaqui/assets/img/events/speaker-4.webp'
-
-// Vote form
-const voteForm = ref({
-  firstName: '',
-  lastName: '',
-  email: '',
-  phone: '',
-  acceptTerms: false,
-  newsletter: false
-})
-
-// Methods
-const fetchParticipant = async () => {
-  try {
-    loading.value = true
-    error.value = null
-    
-    const participantId = route.params.id
-    if (!participantId) {
-      throw new Error('ID do participante não fornecido')
-    }
-
-    const response = await axios.get(`/api/participants/${participantId}`)
-    participant.value = response.data.data || response.data
-    
-  } catch (err) {
-    console.error('Erro ao carregar participante:', err)
-    error.value = 'Não foi possível carregar as informações do participante. Verifique se o link está correto.'
-  } finally {
-    loading.value = false
-  }
-}
-
-const submitVote = async () => {
-  try {
-    submitting.value = true
-    submitError.value = null
-    submitSuccess.value = false
-    
-    const voteData = {
-      participant_id: participant.value.id,
-      voter_name: `${voteForm.value.firstName} ${voteForm.value.lastName}`,
-      voter_email: voteForm.value.email || null,
-      voter_phone: voteForm.value.phone || null,
-      newsletter_subscription: voteForm.value.newsletter
-    }
-    
-    await axios.post('/api/votes', voteData)
-    
-    submitSuccess.value = true
-    
-    // Reset form after successful submission
-    setTimeout(() => {
-      router.push('/')
-    }, 3000)
-    
-  } catch (err) {
-    console.error('Erro ao enviar voto:', err)
-    
-    if (err.response?.status === 429) {
-      submitError.value = 'Limite de votos excedido. Tente novamente mais tarde.'
-    } else if (err.response?.data?.message) {
-      submitError.value = err.response.data.message
-    } else {
-      submitError.value = 'Erro ao registrar voto. Tente novamente.'
-    }
-  } finally {
-    submitting.value = false
-  }
-}
-
-const handleImageError = (event) => {
-  event.target.src = defaultImage
-}
-
-// Lifecycle
-onMounted(() => {
-  fetchParticipant()
-})
-</script>
-
 <template>
-  <div>
-    <!-- Header -->
-    <header id="header" class="header d-flex align-items-center fixed-top">
-      <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
-        <router-link to="/" class="logo d-flex align-items-center">
-          <h1 class="sitename">Votaaqui</h1>
-        </router-link>
-        
-        <!-- Navigation Menu -->
-        <nav class="d-none d-md-flex">
-          <ul class="nav-links d-flex list-unstyled mb-0">
-            <li class="me-3">
-              <router-link to="/" class="nav-link">
-                <i class="bi bi-arrow-left me-1"></i>
-                Voltar
-              </router-link>
-            </li>
-          </ul>
-        </nav>
-      </div>
-    </header>
-
+  <div id="app">
     <main class="main">
       <!-- Page Title -->
       <div class="page-title dark-background" style="background-image: url('/votaaqui/assets/img/events/showcase-9.webp')">
@@ -219,11 +98,13 @@ onMounted(() => {
                             v-model="voteForm.firstName"
                             id="first_name" 
                             class="form-control" 
+                            placeholder="Seu primeiro nome"
                             required
                             :disabled="submitting"
                           >
                         </div>
                       </div>
+                      
                       <div class="col-md-6">
                         <div class="form-group">
                           <label for="last_name">Apelido *</label>
@@ -232,14 +113,13 @@ onMounted(() => {
                             v-model="voteForm.lastName"
                             id="last_name" 
                             class="form-control" 
+                            placeholder="Seu apelido"
                             required
                             :disabled="submitting"
                           >
                         </div>
                       </div>
-                    </div>
-
-                    <div class="row">
+                      
                       <div class="col-md-6">
                         <div class="form-group">
                           <label for="email">Email</label>
@@ -247,45 +127,40 @@ onMounted(() => {
                             type="email" 
                             v-model="voteForm.email"
                             id="email" 
-                            class="form-control"
+                            class="form-control" 
+                            placeholder="seu@email.com"
                             :disabled="submitting"
                           >
                         </div>
                       </div>
+                      
                       <div class="col-md-6">
                         <div class="form-group">
-                          <label for="phone">Contacto</label>
+                          <label for="phone">Contacto (Número de Carteira Móvel) *</label>
                           <input 
-                            type="tel" 
+                            type="number" 
                             v-model="voteForm.phone"
                             id="phone" 
-                            class="form-control"
+                            class="form-control" 
+                            placeholder="841234567"
+                            required
                             :disabled="submitting"
+                            @input="formatPhoneNumber"
+                            pattern="[0-9]{9}"
+                            minlength="9"
+                            maxlength="9"
                           >
+                          <small class="form-text text-muted">
+                            Digite apenas números (9 dígitos). Ex: 841234567
+                          </small>
                         </div>
                       </div>
                     </div>
 
-                    <!-- Vote Summary -->
-                    <div class="pricing-summary">
-                      <h5>Resumo do Voto</h5>
-                      <div class="summary-row">
-                        <span>Voto em:</span>
-                        <span class="ticket-name-display">{{ participant.stage_name || participant.name }}</span>
-                      </div>
-                      <div class="summary-row">
-                        <span>Código:</span>
-                        <span class="quantity-display">{{ participant.voting_code }}</span>
-                      </div>
-                      <div class="summary-row">
-                        <span>Tipo de voto:</span>
-                        <span class="unit-price-display">Gratuito</span>
-                      </div>
-                      <div class="summary-row total">
-                        <span>Total:</span>
-                        <span class="total-price">Grátis</span>
-                      </div>
-                      <div class="tax-note">*Votação gratuita e ilimitada</div>
+                    <!-- Payment and Voting Info -->
+                    <div class="payment-info">
+                      <div class="tax-note">*Voto com pagamento de 50 MT via carteira móvel</div>
+                      <small class="text-muted">O seu voto será contabilizado apenas após confirmação do pagamento.</small>
                     </div>
 
                     <!-- Terms -->
@@ -316,10 +191,31 @@ onMounted(() => {
                     </div>
 
                     <!-- Status Messages -->
-                    <div v-if="submitting" class="loading">Enviando voto...</div>
-                    <div v-if="submitError" class="error-message">{{ submitError }}</div>
+                    <div v-if="processingPayment" class="loading">
+                      <i class="bi bi-credit-card me-2"></i>
+                      Processando pagamento de 50 MT...
+                    </div>
+                    <div v-else-if="paymentSuccess && submitting" class="loading">
+                      <i class="bi bi-check-circle me-2"></i>
+                      Pagamento aprovado! Registrando voto...
+                    </div>
+                    <div v-else-if="submitting" class="loading">
+                      <i class="bi bi-arrow-clockwise me-2"></i>
+                      Enviando voto...
+                    </div>
+                    
+                    <div v-if="paymentError" class="error-message">
+                      <i class="bi bi-exclamation-triangle me-2"></i>
+                      {{ submitError }}
+                    </div>
+                    <div v-else-if="submitError" class="error-message">
+                      <i class="bi bi-exclamation-circle me-2"></i>
+                      {{ submitError }}
+                    </div>
+                    
                     <div v-if="submitSuccess" class="sent-message">
-                      Seu voto foi registrado com sucesso! Obrigado por participar.
+                      <i class="bi bi-check-circle-fill me-2"></i>
+                      Pagamento e voto confirmados! Redirecionando...
                     </div>
 
                     <!-- Submit Button -->
@@ -327,31 +223,24 @@ onMounted(() => {
                       <button 
                         type="submit" 
                         class="btn-submit"
-                        :disabled="submitting || !voteForm.acceptTerms"
+                        :disabled="submitting || !voteForm.acceptTerms || !participant || !participant.id || !voteForm.phone.trim()"
                       >
-                        <i class="bi bi-heart me-2"></i>
-                        {{ submitting ? 'Enviando...' : 'Confirmar Voto' }}
+                        <i v-if="processingPayment" class="bi bi-credit-card me-2"></i>
+                        <i v-else-if="paymentSuccess" class="bi bi-check-circle me-2"></i>
+                        <i v-else class="bi bi-cash me-2"></i>
+                        
+                        <span v-if="processingPayment">Processando Pagamento...</span>
+                        <span v-else-if="paymentSuccess">Registrando Voto...</span>
+                        <span v-else-if="submitting">Enviando...</span>
+                        <span v-else>Pagar 50 MT e Votar</span>
                       </button>
+                      
+                      <!-- Debug info -->
+                      <div v-if="!participant || !participant.id" class="mt-2 text-warning small">
+                        ⚠️ Aguardando carregamento dos dados do participante...
+                      </div>
                     </div>
                   </form>
-
-                  <!-- Security Info -->
-                  <div class="security-info">
-                    <div class="security-badges">
-                      <div class="badge-item">
-                        <i class="bi bi-shield-check"></i>
-                        <span>Voto Seguro</span>
-                      </div>
-                      <div class="badge-item">
-                        <i class="bi bi-lock"></i>
-                        <span>Dados Protegidos</span>
-                      </div>
-                      <div class="badge-item">
-                        <i class="bi bi-arrow-clockwise"></i>
-                        <span>Totalmente Gratuito</span>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -359,341 +248,486 @@ onMounted(() => {
         </div>
       </section>
     </main>
-
-    <!-- Footer -->
-    <footer id="footer" class="footer position-relative dark-background">
-      <div class="container footer-top">
-        <div class="row gy-4">
-          <div class="col-lg-4 col-md-6 footer-about">
-            <router-link to="/" class="logo d-flex align-items-center">
-              <span class="sitename">VotaAqui</span>
-            </router-link>
-            <div class="footer-contact pt-3">
-              <p>Rua Principal, 123</p>
-              <p>Beira, Sofala, Moçambique</p>
-              <p class="mt-3"><strong>Telefone:</strong> <span>+258 123 456 789</span></p>
-              <p><strong>Email:</strong> <span>info@votaaqui.com</span></p>
-            </div>
-          </div>
-          
-          <div class="col-lg-2 col-md-3 footer-links">
-            <h4>Links Úteis</h4>
-            <ul>
-              <li><router-link to="/">Início</router-link></li>
-              <li><a href="#" @click.prevent>Sobre nós</a></li>
-              <li><a href="#" @click.prevent>Termos de serviço</a></li>
-              <li><a href="#" @click.prevent>Política de privacidade</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="container copyright text-center mt-4">
-        <p>© <span>Copyright</span> <strong class="px-1 sitename">VotaAqui</strong> <span>Todos os direitos reservados</span></p>
-        <div class="credits">
-          Desenvolvido com ❤️ para o Reality Show Estrelas do LIV
-        </div>
-      </div>
-    </footer>
   </div>
 </template>
 
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import axios from 'axios'
+
+const route = useRoute()
+const router = useRouter()
+
+// Loading states
+const loading = ref(false)
+const error = ref(null)
+const participant = ref(null)
+
+// Vote submission states
+const submitting = ref(false)
+const submitError = ref(null)
+const submitSuccess = ref(false)
+
+// Payment states - novos para sistema de pagamento
+const processingPayment = ref(false)
+const paymentSuccess = ref(false)
+const paymentError = ref(false)
+const paymentResponse = ref(null)
+
+// Vote form - agora com validação obrigatória do telefone
+const voteForm = ref({
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '', // Agora obrigatório para pagamento
+  acceptTerms: false,
+  newsletter: false
+})
+
+// Fetch participant data
+const fetchParticipant = async () => {
+  try {
+    loading.value = true
+    error.value = null
+    
+    const participantId = route.params.id
+    
+    if (!participantId) {
+      throw new Error('ID do participante não fornecido')
+    }
+    
+    console.log('Fetching participant with ID:', participantId)
+    
+    const response = await axios.get(`/api/votaaqui/participants/${participantId}`)
+    participant.value = response.data.data
+    
+    console.log('Participant loaded:', participant.value)
+    
+  } catch (err) {
+    console.error('Error fetching participant:', err)
+    error.value = err.response?.data?.message || err.message || 'Erro ao carregar participante'
+  } finally {
+    loading.value = false
+  }
+}
+
+// Submit vote function
+const submitVote = async () => {
+  try {
+    submitting.value = true
+    submitError.value = null
+    submitSuccess.value = false
+    paymentError.value = null
+    
+    // Debug: verificar se participant está carregado
+    console.log('Participant data:', participant.value)
+    console.log('Participant ID:', participant.value?.id)
+    
+    if (!participant.value || !participant.value.id) {
+      submitError.value = 'Erro: Dados do participante não encontrados. Recarregue a página.'
+      submitting.value = false
+      return
+    }
+
+    // Validar telefone obrigatório
+    if (!voteForm.value.phone || voteForm.value.phone.trim() === '') {
+      submitError.value = 'Número de telefone é obrigatório para o pagamento.'
+      submitting.value = false
+      return
+    }
+    
+    // Validar formato do número (9 dígitos)
+    const phonePattern = /^[8-9][0-9]{8}$/
+    if (!phonePattern.test(voteForm.value.phone)) {
+      submitError.value = 'Número de telefone inválido. Digite 9 dígitos começando com 8 ou 9.'
+      submitting.value = false
+      return
+    }
+    
+    // Etapa 1: Processar pagamento via carteira móvel
+    processingPayment.value = true
+    submitError.value = 'Processando pagamento de 50 MT...'
+    
+    const paymentData = {
+      amount: 50.00,
+      phone: `+258${voteForm.value.phone}`, // Adicionar prefixo +258
+      description: `Voto para ${participant.value.stage_name || participant.value.name}`,
+      reference: `VOTE_${participant.value.id}_${Date.now()}`
+    }
+    
+    console.log('Processing payment:', paymentData)
+    
+    const paymentResponse = await axios.post('/api/votaaqui/payments/process', paymentData)
+    
+    if (!paymentResponse.data.success) {
+      throw new Error(paymentResponse.data.message || 'Falha no pagamento')
+    }
+    
+    paymentSuccess.value = true
+    processingPayment.value = false
+    submitError.value = 'Pagamento aprovado! Registrando voto...'
+    
+    // Etapa 2: Registrar voto após pagamento bem-sucedido
+    const voteData = {
+      participant_id: participant.value.id,
+      voter_name: `${voteForm.value.firstName} ${voteForm.value.lastName}`,
+      voter_email: voteForm.value.email || null,
+      voter_phone: `+258${voteForm.value.phone}`,
+      newsletter_subscription: voteForm.value.newsletter,
+      payment_reference: paymentResponse.data.reference,
+      payment_amount: 50.00,
+      payment_phone: `+258${voteForm.value.phone}`
+    }
+    
+    console.log('Registering vote with payment:', voteData)
+    
+    const voteResponse = await axios.post('/api/votaaqui/votes', voteData)
+    
+    submitSuccess.value = true
+    
+    // Armazenar dados para a página de sucesso
+    localStorage.setItem('votedParticipant', JSON.stringify(participant.value))
+    localStorage.setItem('voteData', JSON.stringify({
+      voter_name: `${voteForm.value.firstName} ${voteForm.value.lastName}`,
+      voter_email: voteForm.value.email,
+      voter_phone: `+258${voteForm.value.phone}`,
+      payment_amount: 50.00,
+      payment_reference: paymentResponse.data.reference,
+      voted_at: new Date().toISOString()
+    }))
+    
+    // Redirecionar para página de sucesso após 1 segundo
+    setTimeout(() => {
+      router.push('/voto-sucesso')
+    }, 1000)
+    
+  } catch (error) {
+    console.error('Vote submission error:', error)
+    
+    if (processingPayment.value) {
+      paymentError.value = true
+      processingPayment.value = false
+      submitError.value = error.response?.data?.message || error.message || 'Erro no pagamento. Tente novamente.'
+    } else {
+      submitError.value = error.response?.data?.message || error.message || 'Ocorreu um erro ao registrar o voto. Tente novamente.'
+    }
+    
+    submitSuccess.value = false
+  } finally {
+    submitting.value = false
+  }
+}
+
+// Handle image error
+const handleImageError = (event) => {
+  event.target.src = '/votaaqui/assets/img/events/speaker-4.webp'
+}
+
+// Format phone number - only allow numbers
+const formatPhoneNumber = (event) => {
+  let value = event.target.value
+  
+  // Remove all non-numeric characters
+  value = value.replace(/\D/g, '')
+  
+  // Limit to 9 digits
+  if (value.length > 9) {
+    value = value.substring(0, 9)
+  }
+  
+  // Update the form value
+  voteForm.value.phone = value
+  event.target.value = value
+}
+
+// Load participant on component mount
+onMounted(() => {
+  fetchParticipant()
+})
+</script>
+
 <style scoped>
-/* Component-specific styles */
-.header {
-  background-color: rgba(0, 0, 0, 0.9);
-  padding: 1rem 0;
+/* Vote Form Styles */
+.ticket-form-wrapper {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  margin-bottom: 40px;
 }
 
-.nav-links {
-  align-items: center;
-}
-
-.nav-link {
-  color: #bdc3c7;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s ease;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-}
-
-.nav-link:hover {
-  color: #667eea;
-  background-color: rgba(102, 126, 234, 0.1);
-}
-
-.page-title {
-  padding: 120px 0 60px 0;
-  background-size: cover;
-  background-position: center;
-  color: white;
-  position: relative;
-}
-
-.page-title::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-}
-
-.page-title .container {
-  position: relative;
-  z-index: 1;
+.event-info {
   text-align: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 30px;
 }
 
-.breadcrumbs ol {
-  list-style: none;
-  padding: 0;
-  margin: 1rem 0 0;
+.event-info h3 {
+  color: var(--heading-color);
+  font-size: 2rem;
+  margin-bottom: 15px;
+}
+
+.event-meta {
   display: flex;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 30px;
+  flex-wrap: wrap;
 }
 
-.breadcrumbs li {
-  color: #bdc3c7;
+.event-meta span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--default-color);
+  font-weight: 500;
 }
 
-.breadcrumbs li a {
-  color: #667eea;
-  text-decoration: none;
+.event-meta i {
+  color: var(--accent-color);
 }
 
-.breadcrumbs li.current {
-  color: white;
+/* Participant Card */
+.ticket-types {
+  margin-bottom: 30px;
 }
 
-.breadcrumbs li:not(:last-child)::after {
-  content: '/';
-  margin-left: 0.5rem;
-  color: #bdc3c7;
+.ticket-types h4 {
+  color: var(--heading-color);
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+.ticket-option {
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.ticket-option.selected {
+  border-color: var(--accent-color);
+  background-color: rgba(231, 76, 60, 0.05);
 }
 
 .participant-card {
   display: flex;
-  gap: 1.5rem;
-  padding: 1.5rem;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  gap: 20px;
+  align-items: center;
 }
 
 .participant-image {
   flex-shrink: 0;
-  width: 150px;
-  height: 150px;
-  border-radius: 10px;
-  overflow: hidden;
 }
 
 .participant-image img {
-  width: 100%;
-  height: 100%;
+  width: 100px;
+  height: 100px;
   object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid var(--accent-color);
 }
 
 .participant-info h5 {
-  margin: 0 0 0.5rem;
-  color: #2c3e50;
-  font-size: 1.5rem;
+  color: var(--heading-color);
+  margin-bottom: 10px;
+  font-size: 1.4rem;
 }
 
 .participant-bio {
-  color: #666;
-  margin-bottom: 1rem;
-  line-height: 1.5;
+  color: var(--default-color);
+  margin-bottom: 15px;
+  line-height: 1.6;
 }
 
 .participant-details {
   display: flex;
+  gap: 20px;
   flex-wrap: wrap;
-  gap: 1rem;
 }
 
 .participant-details span {
-  color: #667eea;
-  font-size: 0.9rem;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 5px;
+  color: var(--default-color);
+  font-size: 0.9rem;
 }
 
-.ticket-option.selected {
-  border: 2px solid #667eea;
-  border-radius: 10px;
-  margin-bottom: 2rem;
+.participant-details i {
+  color: var(--accent-color);
+}
+
+/* Form Styles */
+.ticket-form {
+  margin-top: 30px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--heading-color);
+  font-weight: 600;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+.form-control:disabled {
+  background-color: #f8f9fa;
+  opacity: 0.8;
+}
+
+/* Payment Info */
+.payment-info {
+  background: rgba(231, 76, 60, 0.1);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  border-radius: 8px;
+  padding: 15px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.tax-note {
+  color: var(--accent-color);
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+/* Checkboxes */
+.terms-checkbox,
+.newsletter-checkbox {
+  margin: 20px 0;
+}
+
+.terms-checkbox input,
+.newsletter-checkbox input {
+  margin-right: 10px;
+}
+
+.terms-checkbox label,
+.newsletter-checkbox label {
+  display: flex;
+  align-items: center;
+  color: var(--default-color);
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.terms-checkbox a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+.terms-checkbox a:hover {
+  text-decoration: underline;
+}
+
+/* Status Messages */
+.loading {
+  background-color: #d1ecf1;
+  border: 1px solid #bee5eb;
+  color: #0c5460;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+}
+
+.sent-message {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Submit Button */
+.form-submit {
+  text-align: center;
+  margin-top: 30px;
 }
 
 .btn-submit {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(45deg, var(--accent-color), #e74c3c);
   color: white;
   border: none;
-  padding: 1rem 2rem;
-  border-radius: 25px;
+  padding: 15px 40px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 50px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-weight: 500;
-  font-size: 1.1rem;
-  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 250px;
 }
 
 .btn-submit:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
 }
 
 .btn-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-.footer {
-  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-  color: white;
-  padding: 3rem 0 1rem;
-  margin-top: 3rem;
-}
-
-.spinner-border {
-  color: #667eea;
-  width: 3rem;
-  height: 3rem;
-}
-
-.alert-danger {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-  border: none;
-  color: white;
-  border-radius: 10px;
-}
-
-/* Form styles */
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  font-weight: 500;
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
-  display: block;
-}
-
-.form-control {
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 0.75rem;
-  transition: border-color 0.3s ease;
-}
-
-.form-control:focus {
-  border-color: #667eea;
-  box-shadow: none;
-}
-
-.pricing-summary {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 10px;
-  margin: 2rem 0;
-}
-
-.summary-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-}
-
-.summary-row.total {
-  font-weight: 600;
-  font-size: 1.1rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid #dee2e6;
-  margin-top: 1rem;
-}
-
-.terms-checkbox,
-.newsletter-checkbox {
-  margin-bottom: 1rem;
-}
-
-.terms-checkbox input,
-.newsletter-checkbox input {
-  margin-right: 0.5rem;
-}
-
-.security-info {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 10px;
-  margin-top: 2rem;
-}
-
-.security-badges {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.badge-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #667eea;
-  font-weight: 500;
-}
-
-.loading,
-.error-message,
-.sent-message {
-  text-align: center;
-  padding: 1rem;
-  border-radius: 8px;
-  margin: 1rem 0;
-}
-
-.loading {
-  background: #e3f2fd;
-  color: #1976d2;
-}
-
-.error-message {
-  background: #ffebee;
-  color: #c62828;
-}
-
-.sent-message {
-  background: #e8f5e8;
-  color: #2e7d32;
+  transform: none;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
+  .ticket-form-wrapper {
+    padding: 20px;
+  }
+  
+  .event-meta {
+    gap: 15px;
+  }
+  
   .participant-card {
     flex-direction: column;
     text-align: center;
-  }
-  
-  .participant-image {
-    width: 120px;
-    height: 120px;
-    margin: 0 auto;
   }
   
   .participant-details {
     justify-content: center;
   }
   
-  .security-badges {
-    flex-direction: column;
-    align-items: center;
+  .btn-submit {
+    min-width: 100%;
   }
 }
 </style>

@@ -32,7 +32,7 @@ class EliminationController extends Controller
 
         // Verificar se os participantes estão ativos
         $participants = Participant::whereIn('id', $request->participant_ids)
-            ->where('active', true)
+            ->where('status', 'active')
             ->get();
 
         if ($participants->count() !== count($request->participant_ids)) {

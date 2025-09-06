@@ -4,8 +4,51 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9aa0bf87634fdd8b1aefb7aff57cdb95",
+    "content-hash": "cee6bc60a05382417d023fe84d8f207e",
     "packages": [
+        {
+            "name": "abdulmueid/mpesa",
+            "version": "v2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/abdulmueid/mpesa-php-api.git",
+                "reference": "de6b7bfb3a37465684385899edd3bb0c8cfa5e74"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/abdulmueid/mpesa-php-api/zipball/de6b7bfb3a37465684385899edd3bb0c8cfa5e74",
+                "reference": "de6b7bfb3a37465684385899edd3bb0c8cfa5e74",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-openssl": "*",
+                "php": "^7.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "abdulmueid\\mpesa\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Abdul Mueid Akhtar",
+                    "email": "abdul.mueid@gmail.com"
+                }
+            ],
+            "description": "PHP SDK for M-Pesa Mozambique API",
+            "support": {
+                "issues": "https://github.com/abdulmueid/mpesa-php-api/issues",
+                "source": "https://github.com/abdulmueid/mpesa-php-api/tree/v2.0.0"
+            },
+            "time": "2020-05-17T01:44:11+00:00"
+        },
         {
             "name": "barryvdh/laravel-dompdf",
             "version": "v3.0.1",
@@ -8502,12 +8545,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.2"
     },
-    "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
 }

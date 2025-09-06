@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\Api\Web\AuthWebController;
 use App\Http\Controllers\Api\Web\UserController;
+use App\Http\Controllers\Api\Web\ParticipantController as AdminParticipantController;
 use App\Http\Controllers\Api\ParticipantController;
 use App\Http\Controllers\Api\VoteController;
 use App\Http\Controllers\Api\EpisodeController;
 use App\Http\Controllers\Api\EliminationController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Middleware\Sanctum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -24,8 +26,33 @@ Route::middleware([Sanctum::class])->group(function () {
 
 });
 
+// Admin Routes - Protected (authentication required)
+Route::middleware([Sanctum::class])->prefix('web')->group(function () {
+    // Participants CRUD (admin only)
+    Route::resource('participants', AdminParticipantController::class);
+    Route::post('participants/{participant}/toggle-status', [AdminParticipantController::class, 'toggleStatus']);
+    Route::get('participants/{participant}/stats', [AdminParticipantController::class, 'stats']);
+    
+    // Episodes CRUD (admin only)
+    Route::resource('episodes', \App\Http\Controllers\Api\Web\EpisodeController::class);
+    Route::post('episodes/{episode}/toggle-voting', [\App\Http\Controllers\Api\Web\EpisodeController::class, 'toggleVoting']);
+    Route::post('episodes/{episode}/change-status', [\App\Http\Controllers\Api\Web\EpisodeController::class, 'changeStatus']);
+    Route::get('episodes/{episode}/stats', [\App\Http\Controllers\Api\Web\EpisodeController::class, 'stats']);
+    Route::get('episodes/{episode}/results', [\App\Http\Controllers\Api\Web\EpisodeController::class, 'results']);
+    Route::get('episodes/participants/available', [\App\Http\Controllers\Api\Web\EpisodeController::class, 'availableParticipants']);
+    Route::post('episodes/{episode}/eliminate-participants', [\App\Http\Controllers\Api\Web\EpisodeController::class, 'eliminateParticipants']);
+    
+    // Elimination management (admin only)
+    Route::post('episodes/{episode}/eliminate', [EliminationController::class, 'eliminate']);
+    Route::post('episodes/{episode}/revert', [EliminationController::class, 'revert']);
+    Route::get('episodes/{episode}/simulate', [EliminationController::class, 'simulate']);
+});
+
 // VotaAqui Routes - Public routes (no authentication required)
 Route::prefix('votaaqui')->group(function () {
+    // Payment routes
+    Route::post('payments/process', [PaymentController::class, 'processPayment']);
+    
     // Participants routes
     Route::get('participants', [ParticipantController::class, 'index']);
     Route::get('participants/{participant}', [ParticipantController::class, 'show']);
@@ -42,14 +69,6 @@ Route::prefix('votaaqui')->group(function () {
     Route::get('episodes/{episode}/results', [EpisodeController::class, 'results']);
     Route::get('eliminations/history', [EpisodeController::class, 'eliminationHistory']);
     Route::get('statistics', [EpisodeController::class, 'statistics']);
-});
-
-// Admin Routes - Protected (authentication required)
-Route::middleware([Sanctum::class])->prefix('admin')->group(function () {
-    // Elimination management (admin only)
-    Route::post('episodes/{episode}/eliminate', [EliminationController::class, 'eliminate']);
-    Route::post('episodes/{episode}/revert', [EliminationController::class, 'revert']);
-    Route::get('episodes/{episode}/simulate', [EliminationController::class, 'simulate']);
 });
 
 // Legacy routes for compatibility

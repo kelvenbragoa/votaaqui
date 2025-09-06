@@ -19,10 +19,14 @@ class VoteController extends Controller
             'participant_id' => 'required|exists:participants,id',
             'voter_name' => 'nullable|string|max:255',
             'voter_email' => 'nullable|email|max:255',
-            'voter_phone' => 'nullable|string|max:20',
+            'voter_phone' => 'required|string|max:20', // Obrigatório para pagamento
             'voter_ip' => 'nullable|ip',
             'voter_device' => 'nullable|string',
             'newsletter_subscription' => 'nullable|boolean',
+            // Campos de pagamento
+            'payment_reference' => 'required|string|max:100',
+            'payment_amount' => 'required|numeric|min:0',
+            'payment_phone' => 'required|string|max:20',
         ]);
 
         try {
@@ -39,40 +43,93 @@ class VoteController extends Controller
                 ], 400);
             }
 
+            // Find current episode with voting open (should be only one, but get the latest)
+            $currentEpisode = \App\Models\Episode::getCurrentActiveEpisode();
+
+            if (!$currentEpisode) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Não há votação ativa no momento'
+                ], 400);
+            }
+
+            // Verificar se o pagamento foi processado (validação adicional)
+            if ($request->payment_amount < 50.00) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Valor de pagamento insuficiente'
+                ], 400);
+            }
+
+            // Find or create participation for this participant in current episode
+            $participation = \App\Models\Participation::firstOrCreate([
+                'participant_id' => $request->participant_id,
+                'episode_id' => $currentEpisode->id,
+            ], [
+                'status' => 'active'
+            ]);
+
             // Get client IP if not provided
             $voterIp = $request->voter_ip ?? $request->ip();
 
-            // Check rate limiting (optional - limit votes per IP per hour)
-            $recentVotes = PublicVote::where('voter_ip', $voterIp)
-                ->where('created_at', '>=', now()->subHour())
-                ->count();
+            // Rate limiting disabled - unlimited voting allowed
+            // $recentVotes = PublicVote::where('ip_address', $voterIp)
+            //     ->where('created_at', '>=', now()->subHour())
+            //     ->count();
+            //
+            // if ($recentVotes >= 10) { // Limit to 10 votes per hour per IP
+            //     return response()->json([
+            //         'success' => false,
+            //         'message' => 'Limite de votos por hora excedido. Tente novamente mais tarde.'
+            //     ], 429);
+            // }
 
-            if ($recentVotes >= 10) { // Limit to 10 votes per hour per IP
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Limite de votos por hora excedido. Tente novamente mais tarde.'
-                ], 429);
-            }
-
-            // Create the vote
+            // Create the vote with payment information
             $vote = PublicVote::create([
-                'participant_id' => $request->participant_id,
-                'voter_name' => $request->voter_name,
-                'voter_email' => $request->voter_email,
-                'voter_phone' => $request->voter_phone,
-                'voter_ip' => $voterIp,
-                'voter_device' => $request->voter_device ?? $request->userAgent(),
-                'newsletter_subscription' => $request->newsletter_subscription ?? false,
+                'participation_id' => $participation->id,
+                'vote_method' => 'web_paid', // Indicar que é voto pago
+                'voter_identifier' => $voterIp,
+                'used_code' => $participant->voting_code,
+                'vote_value' => $request->payment_amount, // Usar valor do pagamento
+                'country' => 'MZ',
+                'validated' => true,
+                'ip_address' => $voterIp,
+                'user_agent' => $request->userAgent(),
+                'extra_data' => json_encode([
+                    'voter_name' => $request->voter_name,
+                    'voter_email' => $request->voter_email,
+                    'voter_phone' => $request->voter_phone,
+                    'newsletter_subscription' => $request->newsletter_subscription ?? false,
+                    'payment_validated' => true,
+                    'payment_processed_at' => now()->toISOString()
+                ]),
                 'voted_at' => now(),
+                // Campos específicos de pagamento
+                'payment_reference' => $request->payment_reference,
+                'payment_amount' => $request->payment_amount,
+                'payment_phone' => $request->payment_phone,
             ]);
+
+            // Update participation vote count
+            $participation->increment('public_votes');
 
             return response()->json([
                 'success' => true,
                 'data' => $vote,
-                'message' => 'Voto registrado com sucesso!',
+                'message' => 'Voto pago registrado com sucesso!',
                 'participant' => [
-                    'name' => $participant->display_name,
+                    'name' => $participant->stage_name ?: $participant->name,
                     'voting_code' => $participant->voting_code
+                ],
+                'episode' => [
+                    'title' => $currentEpisode->title,
+                    'episode_number' => $currentEpisode->episode_number
+                ],
+                'payment' => [
+                    'reference' => $request->payment_reference,
+                    'amount' => $request->payment_amount,
+                    'phone' => $request->payment_phone,
+                    'status' => 'confirmed'
                 ]
             ], 201);
 
@@ -92,12 +149,17 @@ class VoteController extends Controller
     {
         try {
             $stats = DB::table('public_votes')
-                ->join('participants', 'public_votes.participant_id', '=', 'participants.id')
+                ->join('participations', 'public_votes.participation_id', '=', 'participations.id')
+                ->join('participants', 'participations.participant_id', '=', 'participants.id')
+                ->join('episodes', 'participations.episode_id', '=', 'episodes.id')
                 ->select('participants.id', 'participants.name', 'participants.stage_name', 
+                        'episodes.title as episode_title', 'episodes.episode_number',
                         DB::raw('COUNT(public_votes.id) as vote_count'))
                 ->where('participants.active', true)
                 ->whereNull('participants.eliminated_episode_id')
-                ->groupBy('participants.id', 'participants.name', 'participants.stage_name')
+                ->where('episodes.voting_open', true)
+                ->groupBy('participants.id', 'participants.name', 'participants.stage_name', 
+                         'episodes.title', 'episodes.episode_number')
                 ->orderBy('vote_count', 'desc')
                 ->get();
 
@@ -135,17 +197,40 @@ class VoteController extends Controller
         try {
             $participant = Participant::findOrFail($participantId);
             
-            $voteCount = PublicVote::where('participant_id', $participantId)->count();
-            
-            $recentVotes = PublicVote::where('participant_id', $participantId)
-                ->orderBy('created_at', 'desc')
-                ->limit(10)
-                ->get(['voter_ip', 'voted_at']);
+            // Get current episode with voting open
+            $currentEpisode = \App\Models\Episode::where('voting_open', true)
+                ->where('status', 'live')
+                ->first();
+
+            if (!$currentEpisode) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Não há votação ativa no momento'
+                ], 400);
+            }
+
+            // Get participation for current episode
+            $participation = \App\Models\Participation::where('participant_id', $participantId)
+                ->where('episode_id', $currentEpisode->id)
+                ->first();
+
+            $voteCount = 0;
+            $recentVotes = collect();
+
+            if ($participation) {
+                $voteCount = PublicVote::where('participation_id', $participation->id)->count();
+                
+                $recentVotes = PublicVote::where('participation_id', $participation->id)
+                    ->orderBy('created_at', 'desc')
+                    ->limit(10)
+                    ->get(['ip_address', 'voted_at']);
+            }
 
             return response()->json([
                 'success' => true,
                 'data' => [
                     'participant' => $participant,
+                    'episode' => $currentEpisode,
                     'vote_count' => $voteCount,
                     'recent_votes' => $recentVotes
                 ]

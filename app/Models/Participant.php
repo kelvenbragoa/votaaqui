@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Participant extends Model
@@ -44,19 +45,33 @@ class Participant extends Model
     }
 
     /**
-     * Get all public votes for this participant
+     * Get all public votes for this participant through participations
      */
-    public function publicVotes(): HasMany
+    public function publicVotes(): HasManyThrough
     {
-        return $this->hasMany(PublicVote::class);
+        return $this->hasManyThrough(
+            PublicVote::class,
+            Participation::class,
+            'contestant_id', // Foreign key on participations table
+            'participation_id', // Foreign key on public_votes table
+            'id', // Local key on participants table
+            'id' // Local key on participations table
+        );
     }
 
     /**
-     * Get all judge votes for this participant
+     * Get all judge votes for this participant through participations
      */
-    public function judgeVotes(): HasMany
+    public function judgeVotes(): HasManyThrough
     {
-        return $this->hasMany(JudgeVote::class);
+        return $this->hasManyThrough(
+            JudgeVote::class,
+            Participation::class,
+            'contestant_id', // Foreign key on participations table
+            'participation_id', // Foreign key on judge_votes table
+            'id', // Local key on participants table
+            'id' // Local key on participations table
+        );
     }
 
     /**
@@ -64,7 +79,7 @@ class Participant extends Model
      */
     public function participations(): HasMany
     {
-        return $this->hasMany(Participation::class);
+        return $this->hasMany(Participation::class, 'contestant_id');
     }
 
     /**

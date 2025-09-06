@@ -8,22 +8,44 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PublicVote extends Model
 {
     protected $fillable = [
-        'participant_id',
-        'voter_ip',
-        'voter_device',
+        'participation_id',
+        'vote_method',
+        'voter_identifier',
+        'used_code',
+        'vote_value',
+        'operator',
+        'country',
+        'validated',
+        'ip_address',
+        'user_agent',
+        'extra_data',
         'voted_at',
+        'payment_reference',
+        'payment_amount',
+        'payment_phone',
     ];
 
     protected $casts = [
         'voted_at' => 'datetime',
+        'validated' => 'boolean',
+        'vote_value' => 'decimal:2',
+        'payment_amount' => 'decimal:2',
     ];
 
     /**
-     * Get the participant that received this vote
+     * Get the participation that received this vote
+     */
+    public function participation(): BelongsTo
+    {
+        return $this->belongsTo(Participation::class);
+    }
+
+    /**
+     * Get the participant through participation
      */
     public function participant(): BelongsTo
     {
-        return $this->belongsTo(Participant::class);
+        return $this->participation->participant();
     }
 
     /**

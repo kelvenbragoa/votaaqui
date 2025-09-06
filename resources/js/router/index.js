@@ -31,6 +31,11 @@ const router = createRouter({
                     component: () => import('@/views/pages/votaaqui/VotePage.vue')
                 },
                 {
+                    path: 'voto-sucesso',
+                    name: 'voto-sucesso',
+                    component: () => import('@/views/pages/votaaqui/VoteSuccessPage.vue')
+                },
+                {
                     path: 'eliminacoes',
                     name: 'eliminacoes',
                     component: () => import('@/views/pages/votaaqui/EliminationsPage.vue')
@@ -61,6 +66,11 @@ const router = createRouter({
                     path: 'votar/:id',
                     name: 'votaaqui.votar',
                     component: () => import('@/views/pages/votaaqui/VotePage.vue')
+                },
+                {
+                    path: 'voto-sucesso',
+                    name: 'votaaqui.voto-sucesso',
+                    component: () => import('@/views/pages/votaaqui/VoteSuccessPage.vue')
                 },
                 {
                     path: 'eliminacoes',
@@ -317,6 +327,80 @@ const router = createRouter({
                         requiresAuth: true
                     },
                     component: () => import('@/views/pages/admin/users/EditUsers.vue')
+                },
+
+                {
+                    path: '/admin/participants',
+                    name: 'admin.participants',
+                    meta: {
+                        requiresAuth: true
+                    },
+                    component: () => import('@/views/pages/admin/participants/IndexParticipants.vue')
+                },
+                {
+                    path: '/admin/participants/create',
+                    name: 'admin.participants.create',
+                    meta: {
+                        requiresAuth: true
+                    },
+                    component: () => import('@/views/pages/admin/participants/CreateParticipants.vue')
+                },
+                {
+                    path: '/admin/participants/:id',
+                    name: 'admin.participants.show',
+                    meta: {
+                        requiresAuth: true
+                    },
+                    component: () => import('@/views/pages/admin/participants/ShowParticipants.vue')
+                },
+                {
+                    path: '/admin/participants/:id/edit',
+                    name: 'admin.participants.edit',
+                    meta: {
+                        requiresAuth: true
+                    },
+                    component: () => import('@/views/pages/admin/participants/EditParticipants.vue')
+                },
+
+                {
+                    path: '/admin/episodes',
+                    name: 'admin.episodes',
+                    meta: {
+                        requiresAuth: true
+                    },
+                    component: () => import('@/views/pages/votaaqui/admin/episodes/IndexEpisodes.vue')
+                },
+                {
+                    path: '/admin/episodes/create',
+                    name: 'admin.episodes.create',
+                    meta: {
+                        requiresAuth: true
+                    },
+                    component: () => import('@/views/pages/votaaqui/admin/episodes/CreateEpisodes.vue')
+                },
+                {
+                    path: '/admin/episodes/:id',
+                    name: 'admin.episodes.show',
+                    meta: {
+                        requiresAuth: true
+                    },
+                    component: () => import('@/views/pages/votaaqui/admin/episodes/ShowEpisodes.vue')
+                },
+                {
+                    path: '/admin/episodes/:id/edit',
+                    name: 'admin.episodes.edit',
+                    meta: {
+                        requiresAuth: true
+                    },
+                    component: () => import('@/views/pages/votaaqui/admin/episodes/EditEpisodes.vue')
+                },
+                {
+                    path: '/admin/episodes/:id/stats',
+                    name: 'admin.episodes.stats',
+                    meta: {
+                        requiresAuth: true
+                    },
+                    component: () => import('@/views/pages/votaaqui/admin/episodes/StatsEpisodes.vue')
                 },
 
                 {

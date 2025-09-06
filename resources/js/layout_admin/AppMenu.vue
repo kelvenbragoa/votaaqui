@@ -7,15 +7,22 @@ const model = ref([
                     {
                         label: 'Home',
                         items: [
-                            { label: 'Dashboard Caixa', icon: 'pi pi-fw pi-chart-bar', to: '/admin/dashboard' },
+                            { label: 'Dashboard', icon: 'pi pi-fw pi-chart-bar', to: '/admin/dashboard' },
+                        ]
+                    },
+                    {
+                        label: 'VotaAqui Reality Show',
+                        items: [
+                            { label: 'Participantes', icon: 'pi pi-fw pi-users', to: '/admin/participants' },
+                            { label: 'Episódios', icon: 'pi pi-fw pi-video', to: '/admin/episodes' },
                         ]
                     },
                     {
                         label: 'Configurações',
                         items: [
-                            { label: 'Categorias', icon: 'pi pi-fw pi-tags', to: '/admin/categories' },
-                            { label: 'SubCategorias', icon: 'pi pi-fw pi-sitemap', to: '/admin/subcategories' },
-                            { label: 'Produtos', icon: 'pi pi-fw pi-box', to: '/admin/products' },
+                            // { label: 'Categorias', icon: 'pi pi-fw pi-tags', to: '/admin/categories' },
+                            // { label: 'SubCategorias', icon: 'pi pi-fw pi-sitemap', to: '/admin/subcategories' },
+                            // { label: 'Produtos', icon: 'pi pi-fw pi-box', to: '/admin/products' },
                             { label: 'Usuários', icon: 'pi pi-fw pi-user', to: '/admin/users' },
                         ]
                     },

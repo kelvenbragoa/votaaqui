@@ -53,6 +53,14 @@ class VoteController extends Controller
                 ], 400);
             }
 
+            // Verificar se a votação está realmente ativa (horário, status, etc.)
+            if (!$currentEpisode->isVotingActive()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'A votação não está disponível neste momento'
+                ], 400);
+            }
+
             // Verificar se o pagamento foi processado (validação adicional)
             if ($request->payment_amount < 50.00) {
                 return response()->json([

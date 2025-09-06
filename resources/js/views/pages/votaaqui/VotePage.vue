@@ -87,8 +87,14 @@
                     </div>
                   </div>
 
+                  <!-- Voting Status Alert -->
+                  <div v-if="!votingActive" class="alert alert-warning mb-4">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    {{ votingMessage }}
+                  </div>
+
                   <!-- Vote Form -->
-                  <form @submit.prevent="submitVote" class="php-email-form ticket-form">
+                  <form v-if="votingActive" @submit.prevent="submitVote" class="php-email-form ticket-form">
                     <div class="row">
                       <div class="col-md-6">
                         <div class="form-group">
@@ -223,7 +229,7 @@
                       <button 
                         type="submit" 
                         class="btn-submit"
-                        :disabled="submitting || !voteForm.acceptTerms || !participant || !participant.id || !voteForm.phone.trim()"
+                        :disabled="submitting || !voteForm.acceptTerms || !participant || !participant.id || !voteForm.phone.trim() || !votingActive"
                       >
                         <i v-if="processingPayment" class="bi bi-credit-card me-2"></i>
                         <i v-else-if="paymentSuccess" class="bi bi-check-circle me-2"></i>
@@ -241,6 +247,17 @@
                       </div>
                     </div>
                   </form>
+
+                  <!-- Alternative message when voting is not active -->
+                  <div v-if="!votingActive" class="text-center py-4">
+                    <div class="alert alert-info">
+                      <h5><i class="bi bi-info-circle me-2"></i>Votação Indisponível</h5>
+                      <p class="mb-0">{{ votingMessage }}</p>
+                      <router-link to="/" class="btn btn-outline-primary mt-3">
+                        <i class="bi bi-arrow-left me-2"></i>Voltar à Homepage
+                      </router-link>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -269,6 +286,10 @@ const submitting = ref(false)
 const submitError = ref(null)
 const submitSuccess = ref(false)
 
+// Voting availability state
+const votingActive = ref(false)
+const votingMessage = ref('')
+
 // Payment states - novos para sistema de pagamento
 const processingPayment = ref(false)
 const paymentSuccess = ref(false)
@@ -284,6 +305,35 @@ const voteForm = ref({
   acceptTerms: false,
   newsletter: false
 })
+
+// Check if voting is active
+const checkVotingStatus = async () => {
+  try {
+    const response = await axios.get('/api/votaaqui/episodes/current')
+    
+    if (response.data.success && response.data.data) {
+      const episode = response.data.data
+      votingActive.value = episode.voting_open && episode.status === 'live'
+      
+      if (!votingActive.value) {
+        if (!episode.voting_open) {
+          votingMessage.value = 'A votação não está aberta no momento.'
+        } else if (episode.status !== 'live') {
+          votingMessage.value = 'Este episódio não está ativo.'
+        } else {
+          votingMessage.value = 'A votação não está disponível.'
+        }
+      }
+    } else {
+      votingActive.value = false
+      votingMessage.value = 'Não há votação ativa no momento.'
+    }
+  } catch (err) {
+    console.error('Error checking voting status:', err)
+    votingActive.value = false
+    votingMessage.value = 'Erro ao verificar status da votação.'
+  }
+}
 
 // Fetch participant data
 const fetchParticipant = async () => {
@@ -304,6 +354,9 @@ const fetchParticipant = async () => {
     
     console.log('Participant loaded:', participant.value)
     
+    // Verificar status da votação após carregar o participante
+    await checkVotingStatus()
+    
   } catch (err) {
     console.error('Error fetching participant:', err)
     error.value = err.response?.data?.message || err.message || 'Erro ao carregar participante'
@@ -319,6 +372,13 @@ const submitVote = async () => {
     submitError.value = null
     submitSuccess.value = false
     paymentError.value = null
+    
+    // PRIMEIRO: Verificar se a votação está ativa
+    if (!votingActive.value) {
+      submitError.value = votingMessage.value || 'A votação não está ativa no momento.'
+      submitting.value = false
+      return
+    }
     
     // Debug: verificar se participant está carregado
     console.log('Participant data:', participant.value)
@@ -373,11 +433,11 @@ const submitVote = async () => {
       participant_id: participant.value.id,
       voter_name: `${voteForm.value.firstName} ${voteForm.value.lastName}`,
       voter_email: voteForm.value.email || null,
-      voter_phone: `+258${voteForm.value.phone}`,
+      voter_phone: voteForm.value.phone,
       newsletter_subscription: voteForm.value.newsletter,
       payment_reference: paymentResponse.data.reference,
       payment_amount: 50.00,
-      payment_phone: `+258${voteForm.value.phone}`
+      payment_phone: voteForm.value.phone
     }
     
     console.log('Registering vote with payment:', voteData)

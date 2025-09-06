@@ -9,12 +9,30 @@ use Illuminate\Support\Facades\Http;
 use abdulmueid\mpesa\Transaction;
 use abdulmueid\mpesa\Config;
 use App\Models\PublicVote;
+use App\Models\Episode;
 
 class PaymentController extends Controller
 {
     public function processPayment(Request $request): JsonResponse
     {
         try {
+            // PRIMEIRO: Verificar se existe uma votação ativa
+            $activeEpisode = Episode::getCurrentActiveEpisode();
+            
+            if (!$activeEpisode) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Não há votação ativa no momento'
+                ], 400);
+            }
+
+            if (!$activeEpisode->isVotingActive()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'A votação não está disponível neste momento'
+                ], 400);
+            }
+
             // Validar dados de entrada
             $request->validate([
                 'amount' => 'required|numeric|min:0',
@@ -32,11 +50,11 @@ class PaymentController extends Controller
                 'amount' => $amount,
                 'phone' => $phone,
                 'description' => $description,
-                'reference' => $reference
+                'reference' => $reference,
+                'active_episode' => $activeEpisode->id
             ]);
 
-            // Por enquanto, simular processamento de pagamento
-            // Aqui você integraria com a API da carteira móvel real
+            // SEGUNDO: Processar pagamento apenas se a votação estiver ativa
             $paymentResult = $this->processWalletPayment($amount, $phone, $description, $reference);
 
             if ($paymentResult['success']) {
@@ -46,7 +64,8 @@ class PaymentController extends Controller
                     'reference' => $paymentResult['reference'],
                     'transaction_id' => $paymentResult['transaction_id'],
                     'amount' => $amount,
-                    'phone' => $phone
+                    'phone' => $phone,
+                    'episode_id' => $activeEpisode->id
                 ]);
             } else {
                 return response()->json([

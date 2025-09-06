@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use abdulmueid\mpesa\Transaction;
 use abdulmueid\mpesa\Config;
+use App\Models\PublicVote;
 
 class PaymentController extends Controller
 {
@@ -23,7 +24,7 @@ class PaymentController extends Controller
             ]);
 
             $amount = $request->amount;
-            $phone = $this->formatPhoneNumber($request->phone);
+            $phone =$request->phone;
             $description = $request->description;
             $reference = $request->reference;
 
@@ -96,26 +97,50 @@ class PaymentController extends Controller
             // Integração com M-Pesa usando abdulmueid/mpesa
             $config = \abdulmueid\mpesa\Config::loadFromFile('config.php');
             $transactionmpesa = new \abdulmueid\mpesa\Transaction($config);
-            
+
+            // dd($config)
+            $string = substr(str_shuffle(str_repeat($x='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', ceil(3/strlen($x)) )),1,4);
+            $vote = PublicVote::orderBy('id','desc')->first();
+            $add = $vote->id ?? 0 + 1;
+            $ref = 'LIV'.$add.'T'.$string.$add;
+
+    
+
             // Remover o prefixo +258 se existir, pois a API espera apenas números
-            $msisdn = str_replace('+258', '', $phone);
             
             // Usar a referência fornecida
-            $ref = $reference;
+            
             
             Log::info('M-Pesa payment request', [
                 'amount' => $amount,
-                'msisdn' => $msisdn,
+                'msisdn' => $phone,
                 'reference' => $ref,
                 'description' => $description
             ]);
-            
+
+            // dd($phone, $ref);
             $c2b = $transactionmpesa->c2b(
-                $amount, // valor a cobrar do cliente
-                $msisdn, // número de telefone do cliente vodacom com mpesa registrado
-                $ref, // referencia do pagamento
-                $ref // referencia do pagamento
-            );
+                    1, //valor a cobrar do cliente
+                    // 1, //valor a cobrar do cliente
+                    $phone, // número de telefone do cliente vodacom com mpesa registrado
+                    $ref, //referencia do pagamento
+                    $ref //referencia do pagamento
+                );
+
+            // $c2b = $transactionmpesa->c2b(
+            //         50, //valor a cobrar do cliente
+            //         // 1, //valor a cobrar do cliente
+            //         $phone, // número de telefone do cliente vodacom com mpesa registrado
+            //         $ref, //referencia do pagamento
+            //         $ref //referencia do pagamento
+            //     );
+            
+            // $c2b = $transactionmpesa->c2b(
+            //     $amount, // valor a cobrar do cliente
+            //     $phone, // número de telefone do cliente vodacom com mpesa registrado
+            //     $ref, // referencia do pagamento
+            //     $ref // referencia do pagamento
+            // );
             
             Log::info('M-Pesa response', [
                 'code' => $c2b->getCode(),
@@ -144,14 +169,17 @@ class PaymentController extends Controller
                 'INS-9' => 'O tempo expirou. Volte a tentar',
                 'INS-10' => 'Transação duplicada',
                 'INS-16' => 'Erro interno, volte mais tarde',
+                'INS-19' => 'Credenciais M-Pesa inválidas ou não configuradas',
                 'INS-2006' => 'Saldo insuficiente',
-                'INS-2051' => 'Número de telefone inválido'
+                'INS-2051' => 'Número de telefone inválido',
+                '' => 'Erro de configuração M-Pesa'
             ];
             
-            $errorMessage = $errorMessages[$c2b->getCode()] ?? 'Erro desconhecido no pagamento';
+            $errorCode = $c2b->getCode() ?? '';
+            $errorMessage = $errorMessages[$errorCode] ?? 'Erro desconhecido no pagamento (Código: ' . $errorCode . ')';
             
             Log::error('M-Pesa payment failed', [
-                'code' => $c2b->getCode(),
+                'code' => $errorCode,
                 'message' => $errorMessage,
                 'reference' => $ref
             ]);
@@ -159,7 +187,7 @@ class PaymentController extends Controller
             return [
                 'success' => false,
                 'message' => $errorMessage,
-                'mpesa_code' => $c2b->getCode()
+                'mpesa_code' => $errorCode
             ];
             
         } catch (\Exception $e) {

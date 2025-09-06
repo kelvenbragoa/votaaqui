@@ -351,9 +351,9 @@ const submitVote = async () => {
     
     const paymentData = {
       amount: 50.00,
-      phone: `+258${voteForm.value.phone}`, // Adicionar prefixo +258
+      phone: voteForm.value.phone, // Adicionar prefixo +258
       description: `Voto para ${participant.value.stage_name || participant.value.name}`,
-      reference: `VOTE_${participant.value.id}_${Date.now()}`
+      reference: `VOTE_${participant.value.id}`
     }
     
     console.log('Processing payment:', paymentData)

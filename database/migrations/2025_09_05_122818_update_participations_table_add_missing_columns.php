@@ -16,14 +16,14 @@ return new class extends Migration
             // $table->renameColumn('contestant_id', 'participant_id');
             
             // Add missing columns
-            $table->enum('status', ['active', 'eliminated', 'saved'])->default('active')->after('episode_id');
-            $table->integer('position')->nullable()->after('status');
-            $table->integer('elimination_order')->nullable()->after('position');
-            $table->timestamp('eliminated_at')->nullable()->after('elimination_order');
+            // $table->enum('status', ['active', 'eliminated', 'saved'])->default('active')->after('episode_id');
+            // $table->integer('position')->nullable()->after('status');
+            // $table->integer('elimination_order')->nullable()->after('position');
+            // $table->timestamp('eliminated_at')->nullable()->after('elimination_order');
             
             // Add foreign key constraints
-            $table->foreign('participant_id')->references('id')->on('participants')->onDelete('cascade');
-            $table->foreign('episode_id')->references('id')->on('episodes')->onDelete('cascade');
+            // $table->foreign('participant_id')->references('id')->on('participants')->onDelete('cascade');
+            // $table->foreign('episode_id')->references('id')->on('episodes')->onDelete('cascade');
         });
     }
 

@@ -153,8 +153,7 @@ class EpisodeController extends Controller
             'episode_number' => [
                 'required',
                 'integer',
-                'min:1',
-                Rule::unique('episodes')->ignore($id)
+                'min:1'
             ],
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:2000',

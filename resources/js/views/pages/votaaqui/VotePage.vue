@@ -2,9 +2,13 @@
   <div id="app">
     <main class="main">
       <!-- Page Title -->
-      <div class="page-title dark-background" style="background-image: url('/votaaqui/assets/img/events/showcase-9.webp')">
+      <!-- <div class="page-title dark-background" style="background-image: url('/votaaqui/assets/img/events/karaoke.png')"> -->
+      <div 
+        class="page-title dark-background" 
+        style="background-image: url('/votaaqui/assets/img/events/karaoke.png'); background-size: cover; background-repeat: no-repeat; background-position: center;"
+      >
         <div class="container position-relative">
-          <h1>Vote no seu participante</h1>
+          <h1 style="color: white;">Vote no seu participante</h1>
           <p>Complete os dados para confirmar o seu voto.</p>
           <nav class="breadcrumbs">
             <ol>

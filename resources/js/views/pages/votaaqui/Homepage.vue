@@ -27,7 +27,10 @@
 
     <main class="main">
       <!-- Page Title -->
-      <div class="page-title dark-background" style="background-image: url('/votaaqui/assets/img/events/showcase-9.webp')">
+      <div 
+        class="page-title dark-background" 
+        style="background-image: url('/votaaqui/assets/img/events/karaoke.png'); background-size: cover; background-repeat: no-repeat; background-position: center; margin-top: 60px;"
+      >
         <div class="container position-relative">
           <h1 style="color: white;">Reality Show - Estrelas do Liv</h1>
           <p>Vote no teu participante favorito com apenas um clique.</p>

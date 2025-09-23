@@ -56,7 +56,7 @@
   <main class="main">
 
     <!-- Page Title -->
-    <div class="page-title dark-background" style="background-image: url({{asset('votaaqui/assets/img/events/showcase-9.webp')}});">
+    <div class="page-title dark-background" style="background-image: url({{asset('votaaqui/assets/img/events/karaoke.png')}});">
       <div class="container position-relative">
         <h1>Reality Show - Estrelas do Liv</h1>
         <p>Vote no teu participante favorito com apenas um clique.</p>

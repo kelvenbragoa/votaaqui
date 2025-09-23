@@ -28,7 +28,7 @@
 
     <main class="main">
       <!-- Page Title -->
-      <div class="page-title dark-background" style="background-image: url('/votaaqui/assets/img/events/showcase-9.webp')">
+      <div class="page-title dark-background" style="background-image: url('/votaaqui/assets/img/events/karaoke.png')">
         <div class="container position-relative">
           <h1>Episódios do Reality Show</h1>
           <p>Acompanhe todos os episódios da temporada</p>

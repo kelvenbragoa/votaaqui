@@ -15,13 +15,18 @@ class RoleTableSeeder extends Seeder
     {
         //
         DB::table('roles')->insert([
+            // [
+            //     "name"=>"Administrador",
+            //     "created_at"=>now(),
+            //     "updated_at"=>now(),
+            // ],
+            // [
+            //     "name"=>"Supervisor",
+            //     "created_at"=>now(),
+            //     "updated_at"=>now(),
+            // ],
             [
-                "name"=>"Administrador",
-                "created_at"=>now(),
-                "updated_at"=>now(),
-            ],
-            [
-                "name"=>"Supervisor",
+                "name"=>"Juri",
                 "created_at"=>now(),
                 "updated_at"=>now(),
             ],

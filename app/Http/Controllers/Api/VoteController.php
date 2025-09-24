@@ -42,6 +42,12 @@ class VoteController extends Controller
                     'message' => 'Participante não está disponível para votação'
                 ], 400);
             }
+            if ($participant->active == 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Participante não está disponível para votação'
+                ], 400);
+            }
 
             // Find current episode with voting open (should be only one, but get the latest)
             $currentEpisode = \App\Models\Episode::getCurrentActiveEpisode();

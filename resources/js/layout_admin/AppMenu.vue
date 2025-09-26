@@ -15,6 +15,8 @@ const model = ref([
                         items: [
                             { label: 'Participantes', icon: 'pi pi-fw pi-users', to: '/admin/participants' },
                             { label: 'Episódios', icon: 'pi pi-fw pi-video', to: '/admin/episodes' },
+                            { label: 'Votação', icon: 'pi pi-fw pi-bars', to: '/admin/voting' },
+
                         ]
                     },
                     {

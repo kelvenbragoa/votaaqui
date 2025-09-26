@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\JudgeVote;
 use App\Models\Participant;
 use App\Models\PublicVote;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class VoteController extends Controller
@@ -13,6 +15,97 @@ class VoteController extends Controller
     /**
      * Store a newly created vote.
      */
+    public function storejudge(Request $request)
+    {
+        $request->validate([
+            'participant_id' => 'required',
+            // 'judge_id' => 'required',
+            'final_score' => 'required',
+        ]);
+
+        try {
+            // Check if participant is active and not eliminated
+            $participant = Participant::where('id', $request->participant_id)
+                ->where('active', true)
+                ->whereNull('eliminated_episode_id')
+                ->first();
+
+            if (!$participant) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Participante não está disponível para votação'
+                ], 400);
+            }
+            if ($participant->active == 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Participante não está disponível para votação'
+                ], 400);
+            }
+
+            // Find current episode with voting open (should be only one, but get the latest)
+            $currentEpisode = \App\Models\Episode::getCurrentActiveEpisode();
+
+            if (!$currentEpisode) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Não há votação ativa no momento'
+                ], 400);
+            }
+
+            // Verificar se a votação está realmente ativa (horário, status, etc.)
+            if (!$currentEpisode->isVotingActive()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'A votação não está disponível neste momento'
+                ], 400);
+            }
+
+
+
+            // Find or create participation for this participant in current episode
+            $participation = \App\Models\Participation::firstOrCreate([
+                'participant_id' => $request->participant_id,
+                'episode_id' => $currentEpisode->id,
+            ], [
+                'status' => 'active'
+            ]);
+
+
+            // Create the vote with payment information
+            $vote = JudgeVote::create([
+                'participation_id' => $participation->id,
+                'judge_id' => Auth::user()->id, // Indicar que é voto pago
+                'final_score' => $request->final_score,
+                'episode_id' => $currentEpisode->id,
+            ]);
+
+            // Update participation vote count
+            // $participation->increment('judge_votes');
+            $participation->increment('jury_score');
+
+            return response()->json([
+                'success' => true,
+                'data' => $vote,
+                'message' => 'Voto pago registrado com sucesso!',
+                'participant' => [
+                    'name' => $participant->stage_name ?: $participant->name,
+                    'voting_code' => $participant->voting_code
+                ],
+                'episode' => [
+                    'title' => $currentEpisode->title,
+                    'episode_number' => $currentEpisode->episode_number
+                ],
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao registrar voto',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
     public function store(Request $request)
     {
         $request->validate([

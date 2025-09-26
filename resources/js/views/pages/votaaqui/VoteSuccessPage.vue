@@ -113,7 +113,7 @@ const shareVote = () => {
                   <div v-if="participant" class="voted-participant">
                     <div class="participant-avatar">
                       <img 
-                        :src="participant.photo_url || '/votaaqui/assets/img/events/speaker-4.webp'" 
+                        :src="participant.photo_url || '/votaaqui/assets/img/events/gate1.jpg'" 
                         :alt="participant.name"
                         class="img-fluid"
                       >

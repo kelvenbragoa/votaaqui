@@ -162,7 +162,7 @@
                 >
                   <div class="participant-photo">
                     <img 
-                      :src="participant.photo_url || '/votaaqui/assets/img/events/speaker-4.webp'" 
+                      :src="participant.photo_url || '/votaaqui/assets/img/events/gate1.jpg'" 
                       :alt="participant.name"
                       class="img-fluid"
                     >

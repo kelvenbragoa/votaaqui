@@ -22,7 +22,7 @@ class ParticipantSeeder extends Seeder
                 'province' => 'Sofala',
                 'phone' => '+258 823 456 789',
                 'email' => 'jenny@example.com',
-                'photo_url' => '/votaaqui/assets/img/events/speaker-4.webp',
+                'photo_url' => '/votaaqui/assets/img/events/gate1.jpg',
                 'biography' => 'Cantora e compositora talentosa com uma voz única. Começou a cantar aos 12 anos e já participou em vários festivais de música.',
                 'skills' => 'Canto, Composição, Piano, Guitarra',
                 'social_links' => json_encode([
@@ -42,7 +42,7 @@ class ParticipantSeeder extends Seeder
                 'province' => 'Manica',
                 'phone' => '+258 824 567 890',
                 'email' => 'carlos@example.com',
-                'photo_url' => '/votaaqui/assets/img/events/speaker-4.webp',
+                'photo_url' => '/votaaqui/assets/img/events/gate1.jpg',
                 'biography' => 'Dançarino profissional especializado em danças africanas contemporâneas. Formado em artes performativas.',
                 'skills' => 'Dança Contemporânea, Hip-Hop, Marrabenta, Coreografia',
                 'social_links' => json_encode([
@@ -61,7 +61,7 @@ class ParticipantSeeder extends Seeder
                 'province' => 'Tete',
                 'phone' => '+258 825 678 901',
                 'email' => 'maria@example.com',
-                'photo_url' => '/votaaqui/assets/img/events/speaker-4.webp',
+                'photo_url' => '/votaaqui/assets/img/events/gate1.jpg',
                 'biography' => 'Atriz de teatro e cinema com várias peças em seu currículo. Sonha em ser uma estrela internacional.',
                 'skills' => 'Atuação, Teatro, Cinema, Dublagem',
                 'social_links' => json_encode([
@@ -80,7 +80,7 @@ class ParticipantSeeder extends Seeder
                 'province' => 'Sofala',
                 'phone' => '+258 826 789 012',
                 'email' => 'jp@example.com',
-                'photo_url' => '/votaaqui/assets/img/events/speaker-4.webp',
+                'photo_url' => '/votaaqui/assets/img/events/gate1.jpg',
                 'biography' => 'Comediante e apresentador. Conhecido pelos seus espetáculos de stand-up comedy e humor inteligente.',
                 'skills' => 'Comedy, Apresentação, Improvisação, Escrita',
                 'social_links' => json_encode([
@@ -99,7 +99,7 @@ class ParticipantSeeder extends Seeder
                 'province' => 'Maputo',
                 'phone' => '+258 827 890 123',
                 'email' => 'ana@example.com',
-                'photo_url' => '/votaaqui/assets/img/events/speaker-4.webp',
+                'photo_url' => '/votaaqui/assets/img/events/gate1.jpg',
                 'biography' => 'Modelo e influenciadora digital. Apaixonada por moda e estilo de vida saudável.',
                 'skills' => 'Modelagem, Fotografia, Redes Sociais, Fitness',
                 'social_links' => json_encode([
@@ -119,7 +119,7 @@ class ParticipantSeeder extends Seeder
                 'province' => 'Nampula',
                 'phone' => '+258 828 901 234',
                 'email' => 'paulo@example.com',
-                'photo_url' => '/votaaqui/assets/img/events/speaker-4.webp',
+                'photo_url' => '/votaaqui/assets/img/events/gate1.jpg',
                 'biography' => 'Chef de cozinha especializado em culinária moçambicana contemporânea. Vencedor de vários concursos gastronómicos.',
                 'skills' => 'Culinária, Gastronomia, Criatividade, Gestão',
                 'social_links' => json_encode([
@@ -138,7 +138,7 @@ class ParticipantSeeder extends Seeder
                 'province' => 'Sofala',
                 'phone' => '+258 829 012 345',
                 'email' => 'bia@example.com',
-                'photo_url' => '/votaaqui/assets/img/events/speaker-4.webp',
+                'photo_url' => '/votaaqui/assets/img/events/gate1.jpg',
                 'biography' => 'Estudante de medicina e voluntária. Combina os estudos com a paixão pela música e dança.',
                 'skills' => 'Medicina, Canto, Dança, Voluntariado',
                 'social_links' => json_encode([
@@ -157,7 +157,7 @@ class ParticipantSeeder extends Seeder
                 'province' => 'Sofala',
                 'phone' => '+258 830 123 456',
                 'email' => 'rick@example.com',
-                'photo_url' => '/votaaqui/assets/img/events/speaker-4.webp',
+                'photo_url' => '/votaaqui/assets/img/events/gate1.jpg',
                 'biography' => 'Músico e produtor musical. Toca vários instrumentos e produz música para outros artistas.',
                 'skills' => 'Produção Musical, Guitarra, Piano, Bateria',
                 'social_links' => json_encode([

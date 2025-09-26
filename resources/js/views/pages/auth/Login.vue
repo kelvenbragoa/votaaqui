@@ -30,15 +30,7 @@ const loginUser = () => {
             if (response.data.user.role_id == 1 || response.data.user.role_id == 2) {
                 window.location.href = '/admin/dashboard';
             } else if (response.data.user.role_id == 3) {
-                window.location.href = '/waiter/pdv';
-            } else if (response.data.user.role_id == 4) {
-                window.location.href = '/kitchen/pdv';
-            } else if (response.data.user.role_id == 5) {
-                window.location.href = '/bar/pdv'
-            } else if (response.data.user.role_id == 6) {
-                window.location.href = '/stock/dashboard'
-            } else if (response.data.user.role_id == 7) {
-                window.location.href = '/tablemanager/dashboard'
+                window.location.href = '/judge/dashboard';
             };
            
         })

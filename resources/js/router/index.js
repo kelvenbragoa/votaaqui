@@ -1,7 +1,7 @@
 import AppLayout from '@/layout/AppLayout.vue';
 import AppAdminLayout from '@/layout_admin/AppAdminLayout.vue';
 import AppVotaAquiLayout from '@/layout_votaaqui/AppVotaAquiLayout.vue';
-
+import AppJudgeLayout from '@/layout_judge/AppJudgeLayout.vue';
 import AppWaiterLayout from '@/layout_waiter/AppWaiterLayout.vue';
 import AppTableManagerLayout from '@/layout_tablemanager/AppTableManagerLayout.vue';
 
@@ -82,6 +82,21 @@ const router = createRouter({
                     name: 'votaaqui.episodios',
                     component: () => import('@/views/pages/votaaqui/EpisodesPage.vue')
                 }
+            ]
+        },
+        {
+            path: '/judge/dashboard',
+            component: AppJudgeLayout,
+            children: [
+                {
+                    path: '/judge/dashboard',
+                    name: 'judge.dashboard',
+                    meta: {
+                        requiresAuth: true
+                    },
+                    component: () => import('@/views/pages/judge/Dashboard.vue')
+                },
+                
             ]
         },
         {
@@ -360,6 +375,14 @@ const router = createRouter({
                         requiresAuth: true
                     },
                     component: () => import('@/views/pages/admin/participants/EditParticipants.vue')
+                },
+                {
+                    path: '/admin/voting',
+                    name: 'admin.voting',
+                    meta: {
+                        requiresAuth: true
+                    },
+                    component: () => import('@/views/pages/votaaqui/admin/voting/IndexVoting.vue')
                 },
 
                 {

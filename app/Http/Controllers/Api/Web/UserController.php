@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\Judge;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -62,6 +63,7 @@ class UserController extends Controller
             'password' => Hash::make($data['password']) ,
             'role_id'=>$data['role_id'],
         ]);
+
         return response()->json($user);
     }
 
@@ -111,8 +113,8 @@ class UserController extends Controller
     public function destroy(string $id)
     {
         //
-        // $product = User::find($id);
-        // $product->delete();
-        // return true;
+        $user = User::find($id);
+        $user->delete();
+        return true;
     }
 }

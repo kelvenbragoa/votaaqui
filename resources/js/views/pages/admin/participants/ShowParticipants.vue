@@ -135,7 +135,7 @@ onMounted(() => {
                         <div class="card">
                             <div class="text-center">
                                 <img 
-                                    :src="participant.photo_url || '/votaaqui/assets/img/events/speaker-4.webp'" 
+                                    :src="participant.photo_url || '/votaaqui/assets/img/events/gate1.jpg'" 
                                     :alt="participant.name"
                                     class="w-48 h-48 mx-auto rounded-lg object-cover border-4 border-gray-200 mb-4"
                                 />

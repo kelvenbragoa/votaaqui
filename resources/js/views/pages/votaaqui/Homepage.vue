@@ -67,7 +67,7 @@
                   <div class="speaker-meta">
                     <div class="speaker-photo">
                       <img 
-                        :src="participant.photo_url || '/votaaqui/assets/img/events/speaker-4.webp'" 
+                        :src="participant.photo_url || '/votaaqui/assets/img/events/gate1.jpg'" 
                         :alt="participant.name" 
                         class="img-fluid"
                         @error="handleImageError"
@@ -212,7 +212,7 @@ const fetchParticipants = async () => {
         name: 'Jennifer Walsh',
         stage_name: 'Jennifer Walsh',
         biography: 'Cantor e compositor.',
-        photo_url: '/votaaqui/assets/img/events/speaker-4.webp',
+        photo_url: '/votaaqui/assets/img/events/gate1.jpg',
         voting_code: 'JW001'
       },
       {
@@ -220,7 +220,7 @@ const fetchParticipants = async () => {
         name: 'Carlos Silva',
         stage_name: 'Carlos Silva',
         biography: 'Dançarino profissional.',
-        photo_url: '/votaaqui/assets/img/events/speaker-4.webp',
+        photo_url: '/votaaqui/assets/img/events/gate1.jpg',
         voting_code: 'CS002'
       }
     ]
@@ -250,7 +250,7 @@ const handleScroll = () => {
 }
 
 const handleImageError = (event) => {
-  event.target.src = '/votaaqui/assets/img/events/speaker-4.webp'
+  event.target.src = '/votaaqui/assets/img/events/gate1.jpg'
 }
 
 // Lifecycle

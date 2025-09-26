@@ -188,7 +188,7 @@ onMounted(() => {
                     <Column header="Foto" style="min-width: 8rem">
                         <template #body="{ data }">
                             <img 
-                                :src="data.photo_url || '/votaaqui/assets/img/events/speaker-4.webp'" 
+                                :src="data.photo_url || '/votaaqui/assets/img/events/gate1.jpg'" 
                                 :alt="data.name"
                                 class="w-10 h-10 rounded-full object-cover"
                             />

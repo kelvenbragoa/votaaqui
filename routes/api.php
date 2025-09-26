@@ -46,6 +46,8 @@ Route::middleware([Sanctum::class])->prefix('web')->group(function () {
     Route::post('episodes/{episode}/eliminate', [EliminationController::class, 'eliminate']);
     Route::post('episodes/{episode}/revert', [EliminationController::class, 'revert']);
     Route::get('episodes/{episode}/simulate', [EliminationController::class, 'simulate']);
+
+    Route::post('judgevotes', [VoteController::class, 'storejudge']);
 });
 
 // VotaAqui Routes - Public routes (no authentication required)
@@ -58,6 +60,7 @@ Route::prefix('votaaqui')->group(function () {
     Route::get('participants/{participant}', [ParticipantController::class, 'show']);
     
     // Voting routes
+    
     Route::post('votes', [VoteController::class, 'store']);
     Route::get('votes/statistics', [VoteController::class, 'statistics']);
     Route::get('participants/{participant}/votes', [VoteController::class, 'participantVotes']);

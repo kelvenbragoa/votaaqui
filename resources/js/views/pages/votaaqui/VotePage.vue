@@ -66,7 +66,7 @@
                       <div class="participant-card">
                         <div class="participant-image">
                           <img 
-                            :src="participant.photo_url || '/votaaqui/assets/img/events/speaker-4.webp'" 
+                            :src="participant.photo_url || '/votaaqui/assets/img/events/gate1.jpg'" 
                             :alt="participant.name"
                             class="img-fluid"
                             @error="handleImageError"
@@ -485,7 +485,7 @@ const submitVote = async () => {
 
 // Handle image error
 const handleImageError = (event) => {
-  event.target.src = '/votaaqui/assets/img/events/speaker-4.webp'
+  event.target.src = '/votaaqui/assets/img/events/gate1.jpg'
 }
 
 // Format phone number - only allow numbers

@@ -130,7 +130,7 @@
                         </div>
                       </div>
                       
-                      <div class="col-md-6">
+                      <!-- <div class="col-md-6">
                         <div class="form-group">
                           <label for="email">Email</label>
                           <input 
@@ -142,9 +142,9 @@
                             :disabled="submitting"
                           >
                         </div>
-                      </div>
+                      </div> -->
                       
-                      <div class="col-md-6">
+                      <div class="col-md-12">
                         <div class="form-group">
                           <label for="phone">Contacto (Número de Carteira Móvel) *</label>
                           <input 

@@ -218,7 +218,6 @@
                                     suffix="%"
                                     :class="{ 'p-invalid': errors.jury_weight }"
                                     class="w-full"
-                                    @input="updatePublicWeight"
                                     :disabled="hasVotes"
                                 />
                                 <small v-if="errors.jury_weight" class="p-error">{{ errors.jury_weight }}</small>
@@ -238,7 +237,6 @@
                                     suffix="%"
                                     :class="{ 'p-invalid': errors.public_weight }"
                                     class="w-full"
-                                    @input="updateJuryWeight"
                                     :disabled="hasVotes"
                                 />
                                 <small v-if="errors.public_weight" class="p-error">{{ errors.public_weight }}</small>

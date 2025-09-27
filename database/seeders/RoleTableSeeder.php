@@ -15,46 +15,21 @@ class RoleTableSeeder extends Seeder
     {
         //
         DB::table('roles')->insert([
-            // [
-            //     "name"=>"Administrador",
-            //     "created_at"=>now(),
-            //     "updated_at"=>now(),
-            // ],
-            // [
-            //     "name"=>"Supervisor",
-            //     "created_at"=>now(),
-            //     "updated_at"=>now(),
-            // ],
+            [
+                "name"=>"Administrador",
+                "created_at"=>now(),
+                "updated_at"=>now(),
+            ],
+            [
+                "name"=>"Supervisor",
+                "created_at"=>now(),
+                "updated_at"=>now(),
+            ],
             [
                 "name"=>"Juri",
                 "created_at"=>now(),
                 "updated_at"=>now(),
             ],
-            // [
-            //     "name"=>"Garçom",
-            //     "created_at"=>now(),
-            //     "updated_at"=>now(),
-            // ],
-            // [
-            //     "name"=>"Cozinha",
-            //     "created_at"=>now(),
-            //     "updated_at"=>now(),
-            // ],
-            // [
-            //     "name"=>"Bar",
-            //     "created_at"=>now(),
-            //     "updated_at"=>now(),
-            // ],
-            // [
-            //     "name"=>"Stock Manager",
-            //     "created_at"=>now(),
-            //     "updated_at"=>now(),
-            // ],
-            // [
-            //     "name"=>"Gestor de Mesas",
-            //     "created_at"=>now(),
-            //     "updated_at"=>now(),
-            // ],
         ]);
     }
 }

@@ -4,7 +4,7 @@
     <header id="header" class="header d-flex align-items-center fixed-top">
       <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
         <router-link to="/" class="logo d-flex align-items-center">
-          <h1 class="sitename">VotaAqui</h1>
+          <h1 class="">VotaAqui</h1>
         </router-link>
         
         <!-- Navigation Menu -->
@@ -102,7 +102,7 @@
         <div class="row gy-4">
           <div class="col-lg-4 col-md-6 footer-about">
             <router-link to="/" class="logo d-flex align-items-center">
-              <span class="sitename">VotaAqui</span>
+              <span class="">VotaAqui</span>
             </router-link>
             <div class="footer-contact pt-3">
               <p>Rua Principal, 123</p>
@@ -163,10 +163,7 @@
       </div>
 
       <div class="container copyright text-center mt-4">
-        <p>© <span>Copyright</span> <strong class="px-1 sitename">VotaAqui</strong> <span>Todos os direitos reservados</span></p>
-        <div class="credits">
-          Desenvolvido com ❤️ para o Reality Show Estrelas do LIV
-        </div>
+        <p>© <span>Copyright</span> <strong class="">VotaAqui</strong> <span>Todos os direitos reservados</span></p>
       </div>
     </footer>
 

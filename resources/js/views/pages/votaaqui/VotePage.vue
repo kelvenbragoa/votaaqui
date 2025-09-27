@@ -48,7 +48,10 @@
                 <div v-else-if="participant">
                   <!-- Event Info -->
                   <div class="event-info mb-5">
+                    
                     <h3>Reality Show - Estrelas do LIV</h3>
+                    <h4 v-if="episode"> <strong>{{episode.title}}</strong></h4>
+                    <h4 v-else>Nenhuma gala disponivel</h4>
                     <div class="event-details">
                       <div class="event-meta">
                         <span><i class="bi bi-calendar-event"></i> Setembro 2025</span>
@@ -289,6 +292,7 @@ const participant = ref(null)
 const submitting = ref(false)
 const submitError = ref(null)
 const submitSuccess = ref(false)
+const episode = ref(null)
 
 // Voting availability state
 const votingActive = ref(false)
@@ -316,9 +320,9 @@ const checkVotingStatus = async () => {
     const response = await axios.get('/api/votaaqui/episodes/current')
     
     if (response.data.success && response.data.data) {
-      const episode = response.data.data
-      votingActive.value = episode.voting_open && episode.status === 'live'
-      
+      episode.value = response.data.data
+      votingActive.value = episode.value.voting_open && episode.value.status === 'live'
+
       if (!votingActive.value) {
         if (!episode.voting_open) {
           votingMessage.value = 'A votação não está aberta no momento.'
@@ -351,12 +355,12 @@ const fetchParticipant = async () => {
       throw new Error('ID do participante não fornecido')
     }
     
-    console.log('Fetching participant with ID:', participantId)
+    // console.log('Fetching participant with ID:', participantId)
     
     const response = await axios.get(`/api/votaaqui/participants/${participantId}`)
     participant.value = response.data.data
     
-    console.log('Participant loaded:', participant.value)
+    // console.log('Participant loaded:', participant.value)
     
     // Verificar status da votação após carregar o participante
     await checkVotingStatus()
@@ -385,8 +389,8 @@ const submitVote = async () => {
     }
     
     // Debug: verificar se participant está carregado
-    console.log('Participant data:', participant.value)
-    console.log('Participant ID:', participant.value?.id)
+    // console.log('Participant data:', participant.value)
+    // console.log('Participant ID:', participant.value?.id)
     
     if (!participant.value || !participant.value.id) {
       submitError.value = 'Erro: Dados do participante não encontrados. Recarregue a página.'
@@ -420,7 +424,7 @@ const submitVote = async () => {
       reference: `VOTE_${participant.value.id}`
     }
     
-    console.log('Processing payment:', paymentData)
+    // console.log('Processing payment:', paymentData)
     
     const paymentResponse = await axios.post('/api/votaaqui/payments/process', paymentData)
     
@@ -444,7 +448,7 @@ const submitVote = async () => {
       payment_phone: voteForm.value.phone
     }
     
-    console.log('Registering vote with payment:', voteData)
+    // console.log('Registering vote with payment:', voteData)
     
     const voteResponse = await axios.post('/api/votaaqui/votes', voteData)
     

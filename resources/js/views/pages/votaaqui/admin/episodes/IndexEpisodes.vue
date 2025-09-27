@@ -188,8 +188,9 @@ onMounted(() => {
     <div class="grid">
         <div class="col-12">
             <div class="card">
+                <div class="font-semibold text-xl">Episódio</div>
                 <div class="flex justify-content-between align-items-center mb-4">
-                    <h5 class="m-0">Episódios</h5>
+                    
                     <Button 
                         label="Novo Episódio" 
                         icon="pi pi-plus" 
